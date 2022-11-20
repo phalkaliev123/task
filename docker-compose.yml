@@ -1,0 +1,54 @@
+version: '3.5'
+
+services:
+
+  container1:
+    image: webdevops/php-apache-dev:8.1
+    build:
+      context: ./container1
+    container_name: ${PROJECT_NAME}-symfony1
+    ports:
+      - 82:80
+    environment:
+      - WEB_DOCUMENT_ROOT=/var/www/html/public
+      - XDEBUG_MODE=coverage
+    volumes:
+      - ./container1:/var/www/html
+    depends_on:
+      - mysql
+
+  container2:
+    image: webdevops/php-apache-dev:8.1
+    build:
+      context: ./container2
+    container_name: ${PROJECT_NAME}-symfony2
+    environment:
+      - WEB_DOCUMENT_ROOT=/var/www/html/public
+      - XDEBUG_MODE=coverage
+    volumes:
+      - ./container2:/var/www/html
+    depends_on:
+      - mysql
+
+  rabbitmq:
+    image: rabbitmq
+    container_name: ${PROJECT_NAME}-rabbitmq
+    ports:
+      - 15672:15672
+      - 5672:5672
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASS}
+
+  mysql:
+    image: mysql:8.0
+    platform: linux/x86_64
+    container_name: ${PROJECT_NAME}-mysql
+    command: --default-authentication-plugin=mysql_native_password --innodb-use-native-aio=${INNODB_USE_NATIVE_AIO:-1}
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: task
+    ports:
+      - "33061:3306"
+    volumes:
+      - ./var/mysql-data:/var/lib/mysql:delegated

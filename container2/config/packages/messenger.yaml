@@ -1,0 +1,18 @@
+framework:
+    messenger:
+        transports:
+            external_messages:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                options:
+                    auto_setup: false
+                    exchange:
+                        name: messages
+                        type: direct
+                        default_publish_routing_key: from_external
+                    queues:
+                        messages:
+                            binding_keys: [ from_external ]
+
+        routing:
+            # Route your messages to the transports
+            # 'App\Message\YourMessage': async
